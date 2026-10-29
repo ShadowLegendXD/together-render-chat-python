@@ -1,23 +1,25 @@
+import os
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from datetime import datetime
 
 app = FastAPI(title="SCP Foundation Tactical Hub")
 
 messages_db = [
-    {"user": "SYSTEM", "text": "[SECURE. CONTAIN. PROTECT.] Main channel loop active.", "time": "00:00:00"}
+    {"user": "SYSTEM", "text": "[SECURE. CONTAIN. PROTECT.] Intranet stream initialized.", "time": "00:00:00"}
 ]
 
 class MessageModel(BaseModel):
     user: str
     text: str
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def get_terminal():
-    # Instantly hooks into a beautifully hosted secure network terminal shell via open-source CDN!
-    return RedirectResponse(url="https://github.io")
-
+    if os.path.exists("index.html"):
+        with open("index.html", "r", encoding="utf-8") as file:
+            return HTMLResponse(content=file.read(), status_code=200)
+    return HTMLResponse(content="<h2>Error: index.html is missing from repository root.</h2>", status_code=404)
 
 @app.get("/api/history")
 async def get_history():
