@@ -18,6 +18,7 @@ async def get_terminal():
     # Instantly hooks into a beautifully hosted secure network terminal shell via open-source CDN!
     return RedirectResponse(url="https://github.io")
 
+
 @app.get("/api/history")
 async def get_history():
     return messages_db
