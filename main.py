@@ -42,29 +42,20 @@ async def get_terminal():
             @keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
             .chat-lounge { flex:1; display:flex; flex-direction:column; background:#040608; height:100%; position:relative; }
             .chat-topbar { background:var(--panel-bg); padding:15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; box-sizing:border-box; }
-            
-            /* ADAPTIVE VIEWPORT SCROLL FOR MOBILE SAFETY */
             .chat-feed { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; box-sizing:border-box; margin-bottom:70px; }
             .row-pack { display:flex; width:100%; margin:1px 0; }
             .row-pack.me { justify-content:flex-end; }
             .row-pack.them { justify-content:flex-start; }
-            
-            /* HIGH-SPEED MESSAGE GLOW SLIDE ANIMATION */
             .bubble { max-width:75%; padding:10px 12px; border-radius:8px; font-size:14px; line-height:1.4; box-shadow:0 1px 2px rgba(0,0,0,0.2); position:relative; animation:slideUpGlow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity:0; transform:translateY(10px); }
             @keyframes slideUpGlow { to { opacity:1; transform:translateY(0); } }
-            
             .row-pack.me .bubble { background:var(--bubble-out); border:1px solid rgba(0,255,204,0.15); border-top-right-radius:0; color:#fff; }
             .row-pack.them .bubble { background:var(--bubble-in); border:1px solid var(--border); border-top-left-radius:0; }
             .bubble-time { font-size:9px; color:#526284; display:block; text-align:right; margin-top:4px; font-family:sans-serif; }
             .user-tag { font-size:11px; font-weight:bold; color:var(--scp-red); font-family:monospace; display:block; margin-bottom:3px; }
-            
-            /* FIXED BOTTOM COMPRESSION PACKET INPUT BAR */
             .bottom-bar { position:absolute; bottom:0; left:0; width:100%; background:var(--panel-bg); padding:12px 15px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:center; box-sizing:border-box; z-index:10; }
             .text-input { flex:1; background:#020305; border:1px solid var(--border); color:#fff; padding:12px; border-radius:8px; font-size:14px; outline:none; -webkit-appearance:none; }
             .text-input:focus { border-color:var(--neon-cyan); }
             .send-btn { background:#121a24; border:1px solid var(--neon-cyan); color:var(--neon-cyan); padding:12px 20px; font-size:12px; font-weight:bold; cursor:pointer; border-radius:8px; font-family:monospace; }
-            
-            /* RESPONSIVE CSS OVERRIDES FOR MOBILE HIDING BOUNDS */
             @media (max-width: 768px) {
                 .sidebar { display:none; }
                 .bubble { max-width:85%; }
@@ -74,7 +65,6 @@ async def get_terminal():
     <body>
         <div id="auth-gate">
             <div class="gate-card">
-                <!-- LOGISTICS VECTOR CREST SYMBOL -->
                 <svg width="60" height="60" viewBox="0 0 100 100" style="margin-bottom:10px;">
                     <circle cx="50" cy="50" r="40" stroke="#ff3333" stroke-width="3" fill="none" />
                     <circle cx="50" cy="50" r="28" stroke="#ff3333" stroke-width="1.5" fill="none" stroke-dasharray="4 2" />
@@ -90,7 +80,6 @@ async def get_terminal():
                 <button onclick="registerLoungeSession()" class="gate-btn">INITIALIZE CORE FEED</button>
             </div>
         </div>
-
         <div class="workspace">
             <div class="sidebar">
                 <div class="brand-header">
@@ -116,31 +105,21 @@ async def get_terminal():
                 </div>
             </div>
         </div>
-
         <script>
             let operatorHandle = "";
             let audioCtx = null;
-
             function playO5Drone() {
                 try {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    // Low fundamental drone node
-                    let osc1 = audioCtx.createOscillator();
-                    let osc2 = audioCtx.createOscillator();
-                    let gainNode = audioCtx.createGain();
-                    
-                    osc1.type = 'sawtooth'; osc1.frequency.setValueAtTime(55, audioCtx.currentTime); 
-                    osc2.type = 'sine'; osc2.frequency.setValueAtTime(55.5, audioCtx.currentTime);
-                    
-                    // Low pass filter to create heavy sci-fi room tone
-                    let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(120, audioCtx.currentTime);
-                    
+                    let osc1 = audioCtx.createOscillator(); let osc2 = audioCtx.createOscillator(); let gainNode = audioCtx.createGain();
+                    osc1.type = "sawtooth"; osc1.frequency.setValueAtTime(55, audioCtx.currentTime); 
+                    osc2.type = "sine"; osc2.frequency.setValueAtTime(55.5, audioCtx.currentTime);
+                    let filter = audioCtx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.setValueAtTime(120, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
                     osc1.connect(filter); osc2.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination);
                     osc1.start(); osc2.start();
-                } catch(e) { console.error("Audio block deferred:", e); }
+                } catch(e){}
             }
-
             function registerLoungeSession() {
                 let val = document.getElementById("gate-username").value.trim(); if(!val) return;
                 operatorHandle = val.toUpperCase();
@@ -175,7 +154,7 @@ async def get_terminal():
         </script>
     </body>
     </html>
-    \"\"\"
+    """
     return HTMLResponse(content=premium_ui, status_code=200)
 
 @app.get("/api/history")
