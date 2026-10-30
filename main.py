@@ -33,12 +33,14 @@ def create_token(username: str):
     expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
     return jwt.encode({"sub": username, "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
 
-# --- CRITICAL FIX: Explicitly serve index.html on the root path ---
+# --- Serve index.html from the public folder ---
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    if not os.path.exists("index.html"):
-        raise HTTPException(status_code=404, detail="index.html file not found in directory root.")
-    with open("index.html", "r", encoding="utf-8") as file:
+    # LOOKS INSIDE THE PUBLIC FOLDER NOW
+    public_path = os.path.join("public", "index.html")
+    if not os.path.exists(public_path):
+        raise HTTPException(status_code=404, detail="index.html file not found inside the public folder.")
+    with open(public_path, "r", encoding="utf-8") as file:
         return file.read()
 
 # --- REST Authentication Endpoints ---
@@ -71,7 +73,7 @@ async def verify_token(authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="No terminal token.")
     
-    token = authorization.split(" ")[1]
+    token = authorization.split(" ") if " " in authorization else authorization
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         return {"success": True, "username": payload["sub"]}
@@ -108,5 +110,5 @@ async def disconnect(sid):
     username = session.get("username", "Unknown Agent")
     print(f"[LINE DISCONNECTED]: {username}")
 
-# Mount Socket.IO to /socket.io path instead of blocking the main directory root
+# Mount Socket.IO to /socket.io path
 app.mount("/socket.io", sio_app)
