@@ -23,21 +23,19 @@ app.add_middleware(
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 sio_app = socketio.ASGIApp(sio)
 
-# --- SQLite Database Hardening Configuration ---
 DB_FILE = "chat_hub.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # Users table tracking persistent theme updates
+    # CRITICAL FIX: Changed 'TEXT NOT EXISTS' to 'TEXT NOT NULL'
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
-            password TEXT NOT EXISTS,
+            password TEXT NOT NULL,
             active_theme TEXT DEFAULT 'scp'
         )
     """)
-    # Global/Group message archiving engine
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +55,6 @@ def create_token(username: str):
     expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
     return jwt.encode({"sub": username, "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
 
-# --- Serve index.html from Public folder ---
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
     public_path = os.path.join("public", "index.html")
@@ -66,7 +63,6 @@ async def serve_index():
     with open(public_path, "r", encoding="utf-8") as file:
         return file.read()
 
-# --- REST Authentication & WhatsApp Profile Settings Endpoints ---
 @app.post("/api/register")
 async def register(data: dict):
     username = data.get("username", "").strip()
@@ -144,13 +140,11 @@ async def update_theme(data: dict, authorization: str = Header(None)):
     except Exception:
         raise HTTPException(status_code=401, detail="Theme verification error.")
 
-# --- Real-Time Messaging & Chat Sync Events ---
 @sio.event
 async def join(sid, username):
     await sio.save_session(sid, {"username": username})
     print(f"[COM LINK ACTIVE]: {username}")
     
-    # WhatsApp Sync Replication: Pull and send recent database history log entries to the freshly logged-in client terminal
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("SELECT sender, text, voice, timestamp FROM messages ORDER BY id ASC LIMIT 50")
@@ -174,7 +168,6 @@ async def sendMessage(sid, data):
     text_data = data.get("text")
     voice_data = data.get("voice")
     
-    # Commit directly to the persistent SQLite Database
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO messages (sender, text, voice, timestamp) VALUES (?, ?, ?, ?)",
@@ -182,7 +175,6 @@ async def sendMessage(sid, data):
     conn.commit()
     conn.close()
     
-    # Broadcast out instantly to all connected phones/PCs
     await sio.emit("receiveMessage", {
         "sender": username,
         "text": text_data,
