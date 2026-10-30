@@ -1,5 +1,7 @@
 import datetime
-from fastapi import FastAPI, HTTPException, Header, Depends
+import os
+from fastapi import FastAPI, HTTPException, Header
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import jwt
 import socketio
@@ -21,7 +23,7 @@ app.add_middleware(
 
 # Socket.IO setup (ASGI compatible)
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
-sio_app = socketio.ASGIApp(sio, other_asgi_app=app)
+sio_app = socketio.ASGIApp(sio)
 
 # Mock database
 users_db = {}
@@ -30,6 +32,14 @@ users_db = {}
 def create_token(username: str):
     expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
     return jwt.encode({"sub": username, "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
+
+# --- CRITICAL FIX: Explicitly serve index.html on the root path ---
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    if not os.path.exists("index.html"):
+        raise HTTPException(status_code=404, detail="index.html file not found in directory root.")
+    with open("index.html", "r", encoding="utf-8") as file:
+        return file.read()
 
 # --- REST Authentication Endpoints ---
 @app.post("/api/register")
@@ -85,7 +95,6 @@ async def sendMessage(sid, data):
     session = await sio.get_session(sid)
     username = session.get("username", "Unknown Agent")
     
-    # Broadcast voice array strings or texts to all terminals
     await sio.emit("receiveMessage", {
         "sender": username,
         "text": data.get("text"),
@@ -99,5 +108,5 @@ async def disconnect(sid):
     username = session.get("username", "Unknown Agent")
     print(f"[LINE DISCONNECTED]: {username}")
 
-# Render entry point command target: main:app
-app.mount("/", sio_app)
+# Mount Socket.IO to /socket.io path instead of blocking the main directory root
+app.mount("/socket.io", sio_app)
