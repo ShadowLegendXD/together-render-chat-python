@@ -28,7 +28,6 @@ DB_FILE = "chat_hub.db"
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # CRITICAL FIX: Changed 'TEXT NOT EXISTS' to 'TEXT NOT NULL'
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
@@ -106,7 +105,7 @@ async def verify_token(authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="No terminal token provided.")
     
-    token = authorization.split(" ")[1]
+    token = authorization.split(" ")[1] if " " in authorization else authorization
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         username = payload["sub"]
@@ -124,8 +123,8 @@ async def verify_token(authorization: str = Header(None)):
 @app.post("/api/theme")
 async def update_theme(data: dict, authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Unauthorized token verification request.")
-    token = authorization.split(" ")[1]
+        raise HTTPException(status_code=401, detail="Unauthorized token.")
+    token = authorization.split(" ")[1] if " " in authorization else authorization
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         username = payload["sub"]
@@ -138,12 +137,11 @@ async def update_theme(data: dict, authorization: str = Header(None)):
         conn.close()
         return {"success": True, "theme": new_theme}
     except Exception:
-        raise HTTPException(status_code=401, detail="Theme verification error.")
+        raise HTTPException(status_code=401, detail="Theme error.")
 
 @sio.event
 async def join(sid, username):
     await sio.save_session(sid, {"username": username})
-    print(f"[COM LINK ACTIVE]: {username}")
     
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
