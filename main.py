@@ -37,6 +37,13 @@ def init_db():
         )
     """)
     cursor.execute("""
+        CREATE TABLE IF NOT EXISTS rooms (
+            room_name TEXT PRIMARY KEY,
+            creator TEXT,
+            icon TEXT DEFAULT '👥'
+        )
+    """)
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             room TEXT DEFAULT 'Global',
@@ -68,7 +75,7 @@ async def register(data: dict):
     username = data.get("username", "").strip()
     password = data.get("password", "").strip()
     if not username or not password:
-        raise HTTPException(status_code=400, detail="Missing registration parameters.")
+        raise HTTPException(status_code=400, detail="Missing parameters.")
     
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -96,33 +103,24 @@ async def login(data: dict):
     if not row or row[0] != password:
         raise HTTPException(status_code=401, detail="Access Denied: Invalid clearance access key.")
         
-    return {
-        "success": True, 
-        "token": create_token(username), 
-        "username": username, 
-        "theme": row[1], 
-        "custom_bg": row[2]
-    }
+    return {"success": True, "token": create_token(username), "username": username, "theme": row[1], "custom_bg": row[2]}
 
 @app.get("/api/verify")
 async def verify_token(authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing authorization signature token.")
-    
-    token = authorization.split(" ")[1] if " " in authorization else authorization
+        raise HTTPException(status_code=401, detail="Missing validation payload token.")
+    token = authorization.split(" ")[1]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         username = payload["sub"]
-        
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
         cursor.execute("SELECT active_theme, custom_bg FROM users WHERE username = ?", (username,))
         row = cursor.fetchone()
         conn.close()
-        
         return {"success": True, "username": username, "theme": row[0], "custom_bg": row[1]}
     except Exception:
-        raise HTTPException(status_code=401, detail="Session expired.")
+        raise HTTPException(status_code=401, detail="Session validation expired.")
 
 @app.get("/api/accounts")
 async def list_accounts():
@@ -132,6 +130,27 @@ async def list_accounts():
     users = [r[0] for r in cursor.fetchall()]
     conn.close()
     return {"accounts": users}
+
+@app.get("/api/rooms")
+async def list_rooms():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT room_name, icon FROM rooms")
+    rooms = [{"name": r[0], "icon": r[1]} for r in cursor.fetchall()]
+    conn.close()
+    return {"rooms": rooms}
+
+@app.post("/api/rooms/create")
+async def create_room(data: dict):
+    name = data.get("name", "").strip()
+    creator = data.get("creator", "").strip()
+    if not name: return {"success": False}
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR IGNORE INTO rooms (room_name, creator) VALUES (?, ?)", (name, creator))
+    conn.commit()
+    conn.close()
+    return {"success": True}
 
 @app.post("/api/theme/custom")
 async def save_custom_theme(data: dict):
@@ -157,7 +176,6 @@ async def join(sid, data):
     cursor.execute("SELECT sender, text, voice, timestamp FROM messages WHERE room = ? ORDER BY id ASC LIMIT 50", (room,))
     rows = cursor.fetchall()
     conn.close()
-    
     for row in rows:
         await sio.emit("receiveMessage", {
             "sender": row[0], "text": row[1], "voice": row[2], "timestamp": row[3], "isHistory": True
