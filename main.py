@@ -35,6 +35,14 @@ def init_db():
             active_theme TEXT DEFAULT 'scp'
         )
     """)
+    # Permanent WhatsApp Contacts Matrix mappings
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS contacts (
+            user TEXT,
+            contact_name TEXT,
+            PRIMARY KEY (user, contact_name)
+        )
+    """)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,7 +82,7 @@ async def register(data: dict):
     cursor.execute("SELECT 1 FROM users WHERE username = ?", (username,))
     if cursor.fetchone():
         conn.close()
-        raise HTTPException(status_code=400, detail="Codename profile already registered.")
+        raise HTTPException(status_code=400, detail="Username profile already registered.")
     
     cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
     conn.commit()
@@ -94,6 +102,7 @@ async def login(data: dict):
     row = cursor.fetchone()
     conn.close()
     
+    # FIX: Correctly unpack the SQL tuple comparison layer to verify credentials
     if not row or row[0] != password:
         raise HTTPException(status_code=401, detail="Invalid clearance access key.")
         
@@ -120,11 +129,60 @@ async def verify_token(authorization: str = Header(None)):
     except Exception:
         raise HTTPException(status_code=401, detail="Clearance expired or invalid token.")
 
+# --- WhatsApp Contact Assignment Pipelines ---
+@app.get("/api/accounts")
+async def list_accounts():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT username FROM users")
+    users = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return {"accounts": users}
+
+@app.get("/api/contacts")
+async def get_contacts(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    token = authorization.split(" ")[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        username = payload["sub"]
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT contact_name FROM contacts WHERE user = ?", (username,))
+        contacts = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return {"contacts": contacts}
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+@app.post("/api/contacts/add")
+async def add_contact(data: dict, authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    token = authorization.split(" ")[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        username = payload["sub"]
+        target = data.get("contact_name", "").strip()
+        
+        if username == target:
+            raise HTTPException(status_code=400, detail="Cannot self-index.")
+            
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR IGNORE INTO contacts (user, contact_name) VALUES (?, ?)", (username, target))
+        conn.commit()
+        conn.close()
+        return {"success": True}
+    except Exception:
+        raise HTTPException(status_code=401, detail="Transaction validation error")
+
 @app.post("/api/theme")
 async def update_theme(data: dict, authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Unauthorized token.")
-    token = authorization.split(" ")[1] if " " in authorization else authorization
+    token = authorization.split(" ")[1]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         username = payload["sub"]
@@ -142,13 +200,11 @@ async def update_theme(data: dict, authorization: str = Header(None)):
 @sio.event
 async def join(sid, username):
     await sio.save_session(sid, {"username": username})
-    
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("SELECT sender, text, voice, timestamp FROM messages ORDER BY id ASC LIMIT 50")
     rows = cursor.fetchall()
     conn.close()
-    
     for row in rows:
         await sio.emit("receiveMessage", {
             "sender": row[0],
