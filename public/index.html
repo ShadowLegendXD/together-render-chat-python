@@ -3,152 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Custom Core v5</title>
+    <title>AETHERNET: Tactical Node Terminal</title>
     <script src="https://tailwindcss.com"></script>
     <script src="https://socket.io"></script>
     <link rel="stylesheet" href="https://cloudflare.com"/>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        /* === THEME MATRIX SYSTEM === */
-        body.theme-scp { background-color: #0b0f12; font-family: 'Share Tech Mono', monospace; color: #10b981; }
-        .panel-scp { background-color: #111827; border: 2px solid #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
-        .bubble-me-scp { background-color: #065f46; color: #ffffff; border: 1px solid #34d399; border-radius: 12px 12px 0px 12px; }
-        .bubble-them-scp { background-color: #374151; color: #ffffff; border: 1px solid #6b7280; border-radius: 12px 12px 12px 0px; }
+        /* === RADICAL MULTI-THEME REBUILD === */
+        body.theme-scp { background-color: #06090c; font-family: 'Share Tech Mono', monospace; color: #10b981; }
+        .panel-scp { background-color: #0d131a; border: 2px solid #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+        .bubble-me-scp { background-color: #064e3b; color: #ffffff; border: 1px solid #10b981; border-radius: 12px 12px 0px 12px; }
+        .bubble-them-scp { background-color: #1f2937; color: #e5e7eb; border: 1px solid #4b5563; border-radius: 12px 12px 12px 0px; }
 
-        body.theme-minecraft { background-color: #3e2f23; font-family: 'VT323', monospace; color: #ffffff; font-size: 1.4rem; }
-        .panel-minecraft { background-color: #2b1f14; border: 4px solid #5c4033; }
-        .bubble-me-minecraft { background-color: #4a7227; color: #ffffff; border: 2px solid #ffffff; }
-        .bubble-them-minecraft { background-color: #5a5a5a; color: #ffffff; border: 2px solid #d1d1d1; }
+        body.theme-minecraft { background-color: #312217; font-family: 'VT323', monospace; color: #ffffff; font-size: 1.35rem; }
+        .panel-minecraft { background-color: #24160c; border: 4px solid #4a3319; }
+        .bubble-me-minecraft { background-color: #4a7227; color: #ffffff; border: 2px solid #5c8e32; }
+        .bubble-them-minecraft { background-color: #4c4c4c; color: #ffffff; border: 2px solid #7f7f7f; }
 
-        body.theme-combined { background-color: #090d16; font-family: 'Share Tech Mono', monospace; color: #38bdf8; }
-        .panel-combined { background-color: #1e1b4b; border: 2px solid #38bdf8; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4); }
-        .bubble-me-combined { background-color: #9f1239; color: #ffffff; border: 1px solid #f43f5e; }
-        .bubble-them-combined { background-color: #0369a1; color: #ffffff; border: 1px solid #38bdf8; }
+        body.theme-combined { background-color: #040814; font-family: 'Share Tech Mono', monospace; color: #38bdf8; }
+        .panel-combined { background-color: #0b132b; border: 2px solid #38bdf8; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4); }
+        .bubble-me-combined { background-color: #881337; color: #ffffff; border: 1px solid #f43f5e; }
+        .bubble-them-combined { background-color: #0c4a6e; color: #ffffff; border: 1px solid #0284c7; }
 
-        /* Custom Creator Wallpaper Engine overrides */
-        body.theme-custom { background-color: #121214; background-size: cover; background-position: center; font-family: sans-serif; color: #ffffff; }
-        .panel-custom { background-color: rgba(24, 24, 27, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .bubble-me-custom { background-color: #25d366; color: #ffffff; border-radius: 8px 8px 0px 8px; }
-        .bubble-them-custom { background-color: #26262b; color: #ffffff; border-radius: 8px 8px 8px 0px; }
+        body.theme-custom { background-color: #0f0f11; background-size: cover; background-position: center; font-family: sans-serif; color: #ffffff; }
+        .panel-custom { background-color: rgba(18, 18, 24, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); }
+        .bubble-me-custom { background-color: #16a34a; color: #ffffff; border-radius: 12px 12px 0px 12px; }
+        .bubble-them-custom { background-color: #27272a; color: #ffffff; border-radius: 12px 12px 12px 0px; }
 
         .terminal-scroll::-webkit-scrollbar { width: 6px; }
-        .terminal-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        .pulse-mic { animation: recordFlash 1s infinite alternate; }
-        @keyframes recordFlash { 0% { box-shadow: 0 0 0px transparent; } 100% { box-shadow: 0 0 15px #ef4444; background-color: #ef4444; } }
-        video { background: #000; border-radius: 8px; transform: scaleX(-1); }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 4px; }
+        .pulse-mic { animation: microFlash 1s infinite alternate; }
+        @keyframes microFlash { 0% { background-color: #4b5563; } 100% { background-color: #dc2626; box-shadow: 0 0 15px #ef4444; } }
+        video { background: #000; border-radius: 6px; transform: scaleX(-1); }
     </style>
 </head>
-<body class="theme-scp h-screen w-screen flex items-center justify-center p-3 selection:bg-emerald-800">
+<body class="theme-scp h-screen w-screen flex items-center justify-center p-3">
 
-    <!-- PART 1: WHATSAPP SECURITY PORTAL ACCESS (LOGIN / REGISTER) -->
-    <div id="auth-screen" class="w-full max-w-md bg-slate-900 p-8 rounded-lg border-2 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)] animate__animated animate__zoomIn">
-        <h1 class="text-center text-2xl font-black tracking-widest text-emerald-400 mb-6 uppercase">TACTICAL COMM CORE</h1>
+    <!-- STANDALONE SECURE GATEWAY (LOGIN/REGISTER SCREEN Only) -->
+    <div id="auth-screen" class="w-full max-w-md bg-zinc-950 p-8 rounded-lg border-2 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] animate__animated animate__fadeInDown">
+        <div class="text-center mb-6">
+            <div class="inline-block px-3 py-1 border border-emerald-500/40 bg-emerald-950/20 text-emerald-400 font-mono text-[10px] tracking-widest uppercase rounded mb-3">AETHERNET CONNECTION ACCESS</div>
+            <h1 class="text-2xl font-black tracking-widest text-emerald-400 uppercase font-mono">NODE AUTHENTICATION</h1>
+        </div>
         <div class="space-y-4">
             <div>
-                <label class="block text-[10px] text-emerald-400 font-bold mb-1">OPERATOR ID / USERNAME</label>
-                <input type="text" id="username" placeholder="ENTER CODENAME" class="w-full bg-black border-2 border-emerald-500 p-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-400 rounded">
+                <label class="block text-[10px] text-emerald-400 font-mono font-bold tracking-wider mb-1">OPERATOR SYSTEM CODENAME</label>
+                <input type="text" id="username" placeholder="ENTER CODENAME" class="w-full bg-black border-2 border-emerald-600 p-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-400 rounded">
             </div>
             <div>
-                <label class="block text-[10px] text-emerald-400 font-bold mb-1">SECURITY ACCESS PASSPHRASE</label>
-                <input type="password" id="password" placeholder="ENTER PROTECTION KEY" class="w-full bg-black border-2 border-emerald-500 p-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-400 rounded">
+                <label class="block text-[10px] text-emerald-400 font-mono font-bold tracking-wider mb-1">CRYPTOGRAPHIC SECURITY ACCESS KEY</label>
+                <input type="password" id="password" placeholder="ENTER PROTECTION KEY" class="w-full bg-black border-2 border-emerald-600 p-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-400 rounded">
             </div>
             <div class="flex gap-3 pt-2">
-                <button onclick="handleAuth('/api/login')" class="flex-1 bg-emerald-600 border-2 border-emerald-400 text-white font-bold py-3 text-xs uppercase tracking-wider hover:bg-emerald-400 hover:text-black transition rounded">SIGN IN</button>
-                <button onclick="handleAuth('/api/register')" class="flex-1 bg-zinc-800 border-2 border-zinc-600 text-zinc-300 py-3 text-xs uppercase tracking-wider hover:bg-zinc-700 hover:text-white transition rounded">REGISTER</button>
+                <button onclick="handleAuth('/api/login')" class="flex-1 bg-emerald-700 border-2 border-emerald-400 text-white font-black font-mono py-3 text-xs uppercase tracking-wider hover:bg-emerald-400 hover:text-black transition rounded">INITIALIZE NODE</button>
+                <button onclick="handleAuth('/api/register')" class="flex-1 bg-zinc-900 border-2 border-zinc-600 text-zinc-300 font-mono py-3 text-xs uppercase tracking-wider hover:bg-zinc-700 hover:text-white transition rounded">REGISTER</button>
             </div>
         </div>
     </div>
-
-    <!-- PART 2: MAIN WHATSAPP ACTIVE INTERFACE FRAMEWORK -->
-    <div id="chat-screen" class="hidden w-full h-[94vh] max-w-7xl rounded-lg flex overflow-hidden shadow-2xl transition-all duration-300">
+    <!-- PERSISTENT USER CHAT TERMINAL INTERFACE -->
+    <div id="chat-screen" class="hidden w-full h-[95vh] max-w-7xl rounded flex overflow-hidden shadow-2xl transition-all duration-300">
         
-        <!-- SIDEBAR CONTAINER: CHATS, GROUPS, AND WALLPAPER CREATORS -->
-        <div id="left-panel" class="w-80 border-r-2 border-white/20 flex flex-col justify-between panel-scp">
+        <!-- SIDEBAR CONTROLLER PANEL (CHANNELS & ACTIVE THEMES) -->
+        <div id="left-panel" class="w-80 border-r border-white/10 flex flex-col justify-between panel-scp">
             <div class="flex flex-col h-full overflow-hidden">
                 
-                <!-- Active Operator Banner Header -->
-                <div class="p-4 border-b border-white/20 flex items-center justify-between bg-black/40">
+                <!-- Operator Profiler Meta Details -->
+                <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/40">
                     <span id="user-display" class="font-black text-xs text-white tracking-widest uppercase"></span>
-                    <button onclick="logout()" class="text-[10px] text-white border border-red-500 bg-red-600 px-2 py-1 rounded font-bold transition hover:bg-red-400">LOGOUT</button>
+                    
+                    <!-- SETTINGS Portal Dropdown Trigger -->
+                    <div class="relative inline-block text-left">
+                        <button onclick="toggleSettingsPortalDropdown()" class="text-[10px] text-zinc-400 border border-zinc-700 px-2 py-1 rounded bg-zinc-950 font-bold hover:text-white transition uppercase">⚙️ Settings</button>
+                        <div id="settings-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-zinc-950 border border-white/20 rounded shadow-xl z-50">
+                            <button onclick="logout()" class="w-full text-left text-xs text-red-400 font-bold p-3 hover:bg-zinc-900 border-b border-white/5 uppercase">Disconnect</button>
+                            <button onclick="switchActiveChatRoomChannel('Global')" class="w-full text-left text-xs text-zinc-300 p-3 hover:bg-zinc-900 uppercase">System Root</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Core Skin Selection Matrix Dropdown -->
-                <div class="p-3 border-b border-white/20 bg-black/20">
-                    <label class="block text-[10px] text-white mb-1 uppercase font-bold tracking-wider">🎨 CLIENT MATRIX SKIN LAYER</label>
-                    <select id="theme-selector" onchange="swapActiveTheme(this.value)" class="w-full bg-black border border-white/40 text-white p-2 text-xs rounded font-mono font-bold focus:outline-none">
-                        <option value="scp">SCP Foundation Secure Console</option>
-                        <option value="minecraft">Minecraft Block Recipe Grid</option>
-                        <option value="combined">Combined Cyber Anomalous Matrix</option>
-                        <option value="custom">Custom Engine Wallpaper Creator</option>
+                <!-- Live Client Theme Matrix Swapper Selector -->
+                <div class="p-3 border-b border-white/10 bg-black/20">
+                    <label class="block text-[9px] text-white/60 mb-1.5 font-bold uppercase tracking-wider">🎨 CLIENT VISUAL LAYER SKIN</label>
+                    <select id="theme-selector" onchange="swapActiveTheme(this.value)" class="w-full bg-black border border-white/20 p-2.5 text-xs text-white font-mono rounded focus:outline-none">
+                        <option value="scp">Aesthetic Alpha: SCP Console Secure</option>
+                        <option value="minecraft">Aesthetic Beta: Minecraft Grid Array</option>
+                        <option value="combined">Aesthetic Gamma: Cyber Anomalous Core</option>
+                        <option value="custom">Aesthetic Delta: Custom Image Wallpaper Creator</option>
                     </select>
                 </div>
 
                 <!-- Custom Wallpaper Builder: Upload Background Images Like WhatsApp -->
                 <div id="wallpaper-uploader-box" class="hidden p-3 border-b border-white/20 bg-emerald-950/20 space-y-2">
-                    <div class="text-[10px] text-white font-bold uppercase">🖼️ Custom Chat Background Image</div>
+                    <div class="text-[9px] text-emerald-400 font-bold uppercase">🖼️ Custom Chat Background Image Payload</div>
                     <input type="file" id="theme-bg-file" accept="image/*" onchange="uploadCustomWallpaperImage()" class="w-full text-xs text-white file:bg-zinc-800 file:text-white file:border-0 file:py-1 file:px-2 file:rounded file:mr-2">
                 </div>
 
-                <!-- New Chat Groups Generation Row -->
-                <div class="p-3 border-b border-white/20 bg-black/30 space-y-2">
-                    <div class="text-[10px] text-white font-bold uppercase">👥 Create WhatsApp Group Room</div>
-                    <div class="flex gap-1.5">
-                        <input type="text" id="new-room-name" placeholder="Group Name..." class="flex-1 bg-black border border-white/40 p-1.5 text-xs text-white focus:outline-none rounded">
-                        <button onclick="createNewGroupRoomChannel()" class="bg-emerald-600 text-white px-3 text-xs font-bold rounded hover:bg-emerald-400 transition">Create</button>
-                    </div>
-                </div>
-
-                <!-- Directory Hub Scroll Container -->
-                <div class="flex-1 overflow-y-auto p-2 space-y-3 terminal-scroll bg-black/20">
+                <!-- User Directory Feeds -->
+                <div class="flex-1 overflow-y-auto p-2 space-y-3 terminal-scroll bg-black/10">
                     <div>
-                        <div class="text-[10px] text-white/60 font-black uppercase tracking-wider px-2 mb-1">Active Group Channels</div>
+                        <div class="text-[10px] text-white/50 font-black uppercase tracking-wider px-2 mb-1">Synchronized Channels</div>
                         <div id="rooms-list" class="space-y-1"></div>
                     </div>
                     <div class="pt-2 border-t border-white/10">
-                        <div class="text-[10px] text-white/60 font-black uppercase tracking-wider px-2 mb-1">Network Registered Profiles</div>
-                        <div id="accounts-list" class="space-y-1 text-xs px-2 text-white/80 font-mono"></div>
+                        <div class="text-[10px] text-white/50 font-black uppercase tracking-wider px-2 mb-1">Active Network Registers</div>
+                        <div id="accounts-list" class="space-y-1 text-xs px-2 text-white/70 font-mono"></div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- RIGHT PANEL: MAIN WHATSAPP ACTIVE STREAM WINDOW -->
-        <div class="flex-1 flex flex-col h-full bg-black/60 relative">
+
+        <!-- RIGHT PANEL: MAIN CONSOLE CHAT STREAM WINDOW ENGINE -->
+        <div class="flex-1 flex flex-col h-full bg-black/40 relative">
             
-            <!-- Video Overlay Monitor for WhatsApp Calls -->
-            <div id="video-call-overlay" class="hidden absolute top-4 right-4 z-40 flex flex-col gap-2 p-2 bg-black/80 border border-white/20 rounded-lg">
-                <video id="remote-video" autoplay playsinline class="w-48 h-36 bg-zinc-950"></video>
-                <video id="local-video" autoplay playsinline muted class="w-32 h-24 absolute bottom-12 right-4 border border-emerald-400"></video>
-                <button onclick="terminateActiveWebRTCCall()" class="w-full bg-red-600 text-white text-xs font-bold py-1.5 rounded uppercase">End Call</button>
+            <!-- Dynamic Video Interface Handshake Overlay Screen -->
+            <div id="video-call-overlay" class="hidden absolute top-4 right-4 z-40 flex flex-col gap-2 p-2 bg-zinc-950 border border-white/20 rounded-lg">
+                <video id="remote-video" autoplay playsinline class="w-64 h-48 bg-black"></video>
+                <video id="local-video" autoplay playsinline muted class="w-32 h-24 absolute bottom-14 right-4 border border-emerald-400"></video>
+                <button onclick="terminateActiveWebRTCCall()" class="w-full bg-red-600 text-white text-xs font-bold py-2 rounded uppercase">Disconnect Line</button>
             </div>
 
-            <!-- Header Controller with Calling Infrastructure Actions -->
-            <div class="p-4 border-b border-white/20 bg-zinc-900/60 flex justify-between items-center">
-                <div>
-                    <h2 id="active-stream-title" class="text-sm font-black tracking-widest text-white">[GLOBAL MAIN ROOM]</h2>
-                    <p class="text-[10px] opacity-50 uppercase font-mono">Encrypted end-to-end node synchronization</p>
+            <!-- PERSISTENT TOP ACTION CONTROL BAR (Back Button, Calls, Room Title) -->
+            <div class="p-4 border-b border-white/10 bg-zinc-900/60 flex justify-between items-center z-30">
+                <div class="flex items-center gap-3">
+                    <!-- BACK BUTTON -->
+                    <button onclick="switchActiveChatRoomChannel('Global')" class="text-white hover:text-emerald-400 font-bold text-lg px-2 py-1 rounded bg-black/40 border border-white/10 transition" title="Return to System Root Global Room">←</button>
+                    <div>
+                        <h2 id="active-stream-title" class="text-sm font-black tracking-widest text-white uppercase">[GLOBAL CHANNEL MAIN]</h2>
+                        <p class="text-[9px] opacity-40 uppercase font-mono">Encrypted end-to-end matrix node connection</p>
+                    </div>
                 </div>
+                <!-- CALL FEATURES -->
                 <div class="flex gap-2">
-                    <button onclick="initializeVoiceCallSequence()" class="bg-zinc-800 border border-white/20 text-white px-3 py-1.5 text-xs rounded hover:bg-white hover:text-black transition uppercase font-bold">📞 Voice</button>
-                    <button onclick="initializeVideoCallSequence()" class="bg-zinc-800 border border-white/20 text-white px-3 py-1.5 text-xs rounded hover:bg-white hover:text-black transition uppercase font-bold">📹 Video</button>
+                    <button onclick="initializeVideoCallSequence()" class="bg-zinc-950 border border-white/20 text-white px-3 py-1.5 text-xs rounded hover:bg-white hover:text-black transition uppercase font-bold">📹 Video Call</button>
                 </div>
             </div>
 
-            <!-- Messages Logs Hub Grid Layout -->
-            <div id="messages-container" class="flex-1 p-5 overflow-y-auto space-y-4 terminal-scroll bg-[radial-gradient(rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+            <!-- Chat Records Grid Display Tracker -->
+            <div id="messages-container" class="flex-1 p-5 overflow-y-auto space-y-4 terminal-scroll"></div>
 
-            <!-- Message Action Execution Bar -->
-            <div class="p-4 border-t-2 border-white/20 bg-zinc-900 flex items-center gap-3">
-                <input type="text" id="message-input" placeholder="Type verified encrypted message packet..." class="flex-1 bg-black border-2 border-white/40 text-white rounded-lg p-3.5 text-xs font-bold focus:outline-none focus:border-white font-mono">
+            <!-- Terminal Data Input Command Line Row -->
+            <div class="p-4 border-t border-white/10 bg-zinc-950 flex items-center gap-3">
+                <input type="text" id="message-input" placeholder="Type verified encryption terminal data packets..." class="flex-1 bg-black border border-white/30 text-white rounded-lg p-3.5 text-xs focus:outline-none focus:border-white font-mono">
                 
-                <button id="voice-btn" onclick="toggleVoiceRecord()" class="bg-black border-2 border-white/40 text-white p-3.5 rounded-lg hover:bg-white hover:text-black transition flex items-center justify-center">
+                <button id="voice-btn" onclick="toggleVoiceRecord()" class="bg-black border border-white/30 text-emerald-400 p-3.5 rounded-lg hover:bg-white hover:text-black transition flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                 </button>
 
-                <button onclick="sendText()" class="bg-emerald-600 text-white border-2 border-emerald-400 px-6 py-3.5 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-emerald-400 hover:text-black transition duration-200">TRANSMIT</button>
+                <button onclick="sendText()" class="bg-emerald-700 border border-emerald-400 text-white px-6 py-3.5 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-emerald-400 hover:text-black transition duration-200">TRANSMIT</button>
             </div>
         </div>
     </div>
-
     <script>
         const BACKEND_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') 
             ? 'http://127.0.0.1:8000' 
@@ -160,7 +164,6 @@
 
         const rtcConfig = { iceServers: [{ urls: 'stun:://google.com' }] };
 
-        // Autologin System Pipeline Routine Checks
         window.addEventListener('load', async () => {
             const savedToken = localStorage.getItem('scp_session_token');
             if (savedToken) {
@@ -175,14 +178,14 @@
                         if(data.custom_bg) applyCustomWallpaperStyles(data.custom_bg);
                         launchSecureChat(data.username);
                     } else { localStorage.removeItem('scp_session_token'); }
-                } catch (e) { console.error("Database connection exception."); }
+                } catch (e) { console.error("Database connection failure."); }
             }
         });
 
         async function handleAuth(endpoint) {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            if(!username || !password) return alert("All parameters required.");
+            if(!username || !password) return alert("Validation inputs required.");
 
             try {
                 const res = await fetch(`${BACKEND_URL}${endpoint}`, {
@@ -198,8 +201,9 @@
                 currentTheme = data.theme || "scp";
                 if(data.custom_bg) applyCustomWallpaperStyles(data.custom_bg);
                 launchSecureChat(data.username);
-            } catch(e) { alert("Handshake transaction exception."); }
+            } catch(e) { alert("Core authorization node failure."); }
         }
+
         function launchSecureChat(username) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('chat-screen').classList.remove('hidden');
@@ -224,43 +228,27 @@
                 const container = document.getElementById('accounts-list');
                 container.innerHTML = "";
                 dAccounts.accounts.forEach(a => {
-                    container.innerHTML += `<div class="py-1 border-b border-white/5 flex justify-between items-center"><span>● ${a.username} ${a.avatar}</span> <button onclick="switchActiveChatRoomChannel('${a.username}')" class="text-[9px] text-emerald-400 border border-emerald-500/30 px-1 rounded hover:bg-emerald-500 hover:text-black">[Chat]</button></div>`;
+                    container.innerHTML += `<div class="py-1.5 border-b border-white/5 flex justify-between items-center text-xs"><span>● ${a}</span> <button onclick="switchActiveChatRoomChannel('${a}')" class="text-[9px] text-emerald-400 border border-emerald-500/30 px-1 rounded hover:bg-emerald-500 hover:text-black transition font-bold uppercase">[Open Link]</button></div>`;
                 });
             } catch(e){}
 
-            try {
-                const resRooms = await fetch(`${BACKEND_URL}/api/rooms`);
-                const dRooms = await resRooms.json();
-                const container = document.getElementById('rooms-list');
-                container.innerHTML = "";
-                container.innerHTML += `<div onclick="switchActiveChatRoomChannel('Global')" class="p-2 bg-white/5 rounded text-xs font-bold cursor-pointer hover:bg-white/10">[🌍 GLOBAL MAIN CHANNEL]</div>`;
-                dRooms.rooms.forEach(r => {
-                    container.innerHTML += `<div onclick="switchActiveChatRoomChannel('${r.name}')" class="p-2 bg-white/5 rounded text-xs font-bold cursor-pointer hover:bg-white/10 flex items-center gap-2"><span>${r.icon}</span> <span>${r.name.toUpperCase()}</span></div>`;
-                });
-            } catch(e){}
+            const rContainer = document.getElementById('rooms-list');
+            rContainer.innerHTML = `<div onclick="switchActiveChatRoomChannel('Global')" class="p-2.5 bg-white/5 border border-white/10 rounded text-xs font-bold cursor-pointer hover:bg-white/10 transition uppercase tracking-wider">[🌍 System Root Main Stream]</div>`;
         }
 
         function switchActiveChatRoomChannel(targetRoomName) {
             activeRoom = targetRoomName;
-            document.getElementById('active-stream-title').innerText = `[ROOM: ${targetRoomName.toUpperCase()}]`;
+            document.getElementById('active-stream-title').innerText = `[NODE: ${targetRoomName.toUpperCase()}]`;
             document.getElementById('messages-container').innerHTML = "";
             if(socket) {
                 socket.emit('join', { username: currentUser, room: targetRoomName });
             }
         }
 
-        async function createNewGroupRoomChannel() {
-            const name = document.getElementById('new-room-name').value.trim();
-            if(!name) return;
-            await fetch(`${BACKEND_URL}/api/rooms/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, creator: currentUser, icon: '👥' })
-            });
-            document.getElementById('new-room-name').value = "";
-            syncNetworkUserDirectories();
+        function toggleSettingsPortalDropdown() {
+            const menu = document.getElementById('settings-dropdown');
+            menu.classList.toggle('hidden');
         }
-
         async function swapActiveTheme(newTheme) {
             currentTheme = newTheme;
             applyThemeClasses(newTheme);
@@ -271,6 +259,7 @@
                 document.body.style.backgroundImage = "none";
             }
         }
+
         function uploadCustomWallpaperImage() {
             const file = document.getElementById('theme-bg-file').files[0];
             if(!file) return;
@@ -293,7 +282,7 @@
         function applyThemeClasses(theme) {
             document.body.className = `theme-${theme}`;
             const leftPanel = document.getElementById('left-panel');
-            leftPanel.className = `w-80 border-r-2 border-white/20 flex flex-col justify-between panel-${theme}`;
+            leftPanel.className = `w-80 border-r border-white/10 flex flex-col justify-between panel-${theme}`;
         }
 
         function logout() {
@@ -325,7 +314,7 @@
                     mediaRecorder.start();
                     isRecording = true;
                     btn.classList.add('pulse-mic');
-                } catch (err) { alert("Microphone clearance fault."); }
+                } catch (err) { alert("Microphone clearance error."); }
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
