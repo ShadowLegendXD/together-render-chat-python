@@ -3,149 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCP Foundation - Restricted Terminal v4.02</title>
+    <title>Multi-Theme Secure Com-Hub Client</title>
     <script src="https://tailwindcss.com"></script>
     <script src="https://socket.io"></script>
     <link rel="stylesheet" href="https://cloudflare.com"/>
+    <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        body {
-            background-color: #030704;
-            font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
-            color: #10b981;
-            overflow: hidden;
-        }
-        /* CRT Grid Monitor Overlay */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
-            z-index: 99999;
-            opacity: 0.6;
-            pointer-events: none;
-            background-size: 100% 5px, 6px 100%;
-        }
-        /* Neon Radiation Shadows */
-        .scp-glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); border: 1px solid rgba(16, 185, 129, 0.6); }
-        .scp-glow-red { box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); border: 1px solid rgba(239, 68, 68, 0.7); }
-        .terminal-scroll::-webkit-scrollbar { width: 4px; }
-        .terminal-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        .terminal-scroll::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.4); border-radius: 2px; }
-        
-        /* Tactical Terminal Glitch Animation */
-        @keyframes scpGlitch {
-            0% { transform: translate(0) text-shadow: 0 0 0 transparent; }
-            20% { transform: translate(-2px, 2px); text-shadow: 2px 0 0 rgba(239,68,68,0.5), -2px 0 0 rgba(56,189,248,0.5); }
-            40% { transform: translate(1px, -1px); }
-            60% { transform: translate(-1px, 1px); }
-            80% { transform: translate(2px, 1px); text-shadow: -1px 0 0 rgba(239,68,68,0.5); }
-            100% { transform: translate(0); }
-        }
-        .glitch-text { animation: scpGlitch 3s infinite linear alternate-reverse; }
-        .voice-pulse { animation: voiceActive 1s infinite alternate; }
-        @keyframes voiceActive {
-            0% { background-color: rgba(239, 68, 68, 0.2); box-shadow: 0 0 5px rgba(239, 68, 68, 0.5); }
-            100% { background-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 25px rgba(239, 68, 68, 0.9); }
-        }
+        /* === THEME MATRIX SYSTEM === */
+        /* SCP Foundation (Classified Cyberpunk Terminal) */
+        body.theme-scp { background-color: #030604; font-family: 'Share Tech Mono', monospace; color: #10b981; }
+        body.theme-scp ::before { content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%); z-index: 99999; pointer-events: none; background-size: 100% 4px; opacity: 0.4; }
+        .panel-scp { background-color: rgba(0, 5, 2, 0.85); border: 1px solid #064e3b; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
+        .bubble-me-scp { background-color: #064e3b; color: #a7f3d0; border: 1px solid #10b981; border-radius: 12px 12px 0px 12px; }
+        .bubble-them-scp { background-color: #1c1917; color: #d6d3d1; border: 1px solid #44403c; border-radius: 12px 12px 12px 0px; }
+
+        /* Minecraft Layout (Pixel Art Block Engine style) */
+        body.theme-minecraft { background-color: #4c3e31; font-family: 'VT323', monospace; color: #ffffff; font-size: 1.25rem; }
+        .panel-minecraft { background-color: #2e2216; border: 4px solid #1a1108; box-shadow: inset -4px -4px #4a3b2c, inset 4px 4px #110a05; }
+        .bubble-me-minecraft { background-color: #5c8e32; color: #ffffff; border: 3px solid #3c5e20; border-radius: 4px; }
+        .bubble-them-minecraft { background-color: #706253; color: #ffffff; border: 3px solid #4a3e33; border-radius: 4px; }
+
+        /* Combined Theme (Anomalous Matrix Core) */
+        body.theme-combined { background-color: #0a0f1d; font-family: 'Share Tech Mono', monospace; color: #38bdf8; }
+        .panel-combined { background-color: rgba(13, 20, 38, 0.9); border: 1px dashed #38bdf8; box-shadow: 0 0 25px rgba(244, 63, 94, 0.2), inset 0 0 15px rgba(56, 189, 248, 0.1); }
+        .bubble-me-combined { background-color: #881337; color: #fda4af; border: 1px solid #f43f5e; border-radius: 16px 16px 4px 16px; }
+        .bubble-them-combined { background-color: #0c4a6e; color: #bae6fd; border: 1px solid #0284c7; border-radius: 16px 16px 16px 4px; }
+
+        .terminal-scroll::-webkit-scrollbar { width: 5px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 9px; }
+        .pulse-mic { animation: recordFlash 1s infinite alternate; }
+        @keyframes recordFlash { 0% { box-shadow: 0 0 0px rgba(239,68,68,0); } 100% { box-shadow: 0 0 20px rgba(239,68,68,1); background-color: #ef4444; } }
     </style>
 </head>
-<body class="h-screen w-screen flex items-center justify-center p-3 selection:bg-emerald-900 selection:text-emerald-200">
+<body class="theme-scp h-screen w-screen flex items-center justify-center p-3">
 
-    <!-- OVERLAY WARNING BANNER -->
-    <div class="fixed top-0 left-0 w-full bg-red-950/40 border-b border-red-500/30 text-red-500 text-[10px] tracking-[0.3em] uppercase py-1 px-4 flex justify-between z-50 font-bold">
-        <span>[STATUS: RESTRICTED COMMUNICATION DATA-LINK]</span>
-        <span class="animate-pulse">● LIVE CONNECTION ACTIVE</span>
-    </div>
-
-    <!-- AUTHENTICATION CONTROL TERMINAL -->
-    <div id="auth-screen" class="w-full max-w-lg bg-black/90 p-8 rounded border border-red-900/60 scp-glow-red animate__animated animate__backInDown relative">
-        <div class="absolute top-2 right-3 text-[9px] text-red-600/60 font-bold">SYS_LOG: UNAUTHORIZED ATTEMPTS LOGGED</div>
-        <div class="text-center mb-8">
-            <div class="mx-auto w-16 h-16 mb-3 border-2 border-red-500 rounded-full flex items-center justify-center text-red-500 font-black text-xl tracking-tighter opacity-80 animate-spin-[spin_10s_linear_infinite]">SCP</div>
-            <h1 class="text-2xl font-black tracking-widest text-red-500 glitch-text">FOUNDATION COMM PORTAL</h1>
-            <div class="text-[10px] text-red-400/70 tracking-widest uppercase mt-2 border border-red-900/40 bg-red-950/20 py-1 px-2 rounded">
-                WARNING: ASSIGNED CODENAMES REQUIRED CORRESPONDING TO O5 DIRECTIVE
-            </div>
-        </div>
+    <!-- SIGN-IN SECURITY PORTAL -->
+    <div id="auth-screen" class="w-full max-w-md bg-black/90 p-8 rounded border border-emerald-900/60 shadow-[0_0_30px_rgba(16,185,129,0.2)] animate__animated animate__zoomIn">
+        <h1 class="text-center text-xl font-bold tracking-widest text-emerald-400 mb-6 uppercase">WhatsApp // Tactical Core Setup</h1>
         <div class="space-y-4">
-            <div>
-                <label class="block text-[10px] uppercase text-red-400 tracking-wider mb-1">OPERATOR CODENAME</label>
-                <input type="text" id="username" placeholder="e.g., Agent_Strelnikov" class="w-full bg-zinc-950 border border-red-900/50 p-3 text-red-400 placeholder-red-950 font-mono focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded transition">
-            </div>
-            <div>
-                <label class="block text-[10px] uppercase text-red-400 tracking-wider mb-1">CRYPTOGRAPHIC SECURITY KEY</label>
-                <input type="password" id="password" placeholder="••••••••••••" class="w-full bg-zinc-950 border border-red-900/50 p-3 text-red-400 placeholder-red-950 font-mono focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded transition">
-            </div>
-            <div class="flex gap-4 pt-3">
-                <button onclick="handleAuth('/api/login')" class="flex-1 bg-red-950/40 border border-red-500 text-red-500 p-3 rounded font-bold uppercase tracking-widest text-xs hover:bg-red-500 hover:text-black transition duration-200">INITIALIZE ACCESS</button>
-                <button onclick="handleAuth('/api/register')" class="flex-1 bg-zinc-950 border border-zinc-700 text-zinc-500 p-3 rounded font-bold uppercase tracking-widest text-xs hover:bg-zinc-800 hover:text-zinc-200 transition duration-200">REGISTER TERMINAL</button>
+            <input type="text" id="username" placeholder="CODENAME ACCOUNT" class="w-full bg-zinc-950 border border-emerald-900/60 p-3 text-emerald-400 font-mono text-xs focus:outline-none focus:border-emerald-400 rounded">
+            <input type="password" id="password" placeholder="PASSPHRASE DEPLOYMENT KEY" class="w-full bg-zinc-950 border border-emerald-900/60 p-3 text-emerald-400 font-mono text-xs focus:outline-none focus:border-emerald-400 rounded">
+            <div class="flex gap-3 pt-2">
+                <button onclick="handleAuth('/api/login')" class="flex-1 bg-emerald-950/60 border border-emerald-500 text-emerald-400 py-3 text-xs uppercase tracking-wider font-bold hover:bg-emerald-500 hover:text-black transition rounded">Login</button>
+                <button onclick="handleAuth('/api/register')" class="flex-1 bg-zinc-900 border border-zinc-700 text-zinc-400 py-3 text-xs uppercase tracking-wider hover:bg-zinc-700 hover:text-white transition rounded">Register</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN IMMERSIVE CHAT WINDOW INTERFACE -->
-    <div id="chat-screen" class="hidden w-full h-[92vh] max-w-7xl bg-zinc-950/80 rounded border border-emerald-500/40 scp-glow-green flex animate__animated animate__fadeIn">
+    <!-- MAIN IMMERSIVE CHAT LOG MATRIX INTERFACE -->
+    <div id="chat-screen" class="hidden w-full h-[94vh] max-w-6xl rounded flex overflow-hidden shadow-2xl transition-all duration-300">
         
-        <!-- SIDEBAR CONTROLS -->
-        <div class="w-80 border-r border-emerald-500/20 flex flex-col bg-black/60 relative">
-            <div class="p-4 border-b border-emerald-500/20 bg-emerald-950/10 flex flex-col gap-2">
-                <div class="flex justify-between items-center">
-                    <span class="text-[11px] uppercase tracking-wider text-emerald-500 font-bold flex items-center gap-1.5">
-                        <span class="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                        AGENT: <span id="user-display" class="text-emerald-300"></span>
-                    </span>
-                    <button onclick="logout()" class="text-[10px] text-red-400 border border-red-900/50 px-2 py-0.5 rounded bg-red-950/20 hover:bg-red-500 hover:text-black transition uppercase">TERMINATE</button>
+        <!-- SIDEBAR LEFT CONTAINER: CONTACTS PANEL & WHATSAPP PROFILE STYLES -->
+        <div id="left-panel" class="w-80 border-r border-white/10 flex flex-col justify-between">
+            <div>
+                <!-- User Status Banner Header -->
+                <div class="p-4 border-b border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span id="user-display" class="font-bold text-sm tracking-wide"></span>
+                    </div>
+                    <button onclick="logout()" class="text-[10px] opacity-60 hover:opacity-100 hover:underline border border-white/20 px-2 py-0.5 rounded transition">DISCONNECT</button>
                 </div>
-                <div class="text-[9px] text-emerald-600 uppercase tracking-widest font-mono border border-emerald-900/40 bg-black/40 px-2 py-1 rounded">Clearance Status: LEVEL 4 ACCREDITED</div>
+
+                <!-- WHATSAPP SCHEME SELECTOR: SYSTEM PROFILE SKIN CORES -->
+                <div class="p-3 border-b border-white/10 bg-black/30">
+                    <label class="block text-[10px] tracking-wider uppercase opacity-60 mb-1.5 font-bold">🎨 Select Client Visual Matrix Layer</label>
+                    <select id="theme-selector" onchange="swapActiveTheme(this.value)" class="w-full bg-black/60 border border-white/20 p-2 text-xs rounded font-mono focus:outline-none">
+                        <option value="scp">Aesthetic Alpha: SCP Terminal Secure Layout</option>
+                        <option value="minecraft">Aesthetic Beta: Minecraft Recipe Grid</option>
+                        <option value="combined">Aesthetic Gamma: Combined Anomalous Fusion</option>
+                    </select>
+                </div>
+
+                <!-- Chat Rooms Feed -->
+                <div class="p-2">
+                    <div class="p-3 bg-white/5 rounded border border-white/10 flex items-center gap-3 cursor-pointer">
+                        <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center font-bold text-xs">💬</div>
+                        <div class="flex-1">
+                            <div class="text-xs font-bold tracking-wide flex justify-between">[GLOBAL CORE STREAM] <span class="text-[9px] opacity-40">Live</span></div>
+                            <p class="text-[11px] opacity-60 truncate mt-0.5">Continuous synchronization transmission loop...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <!-- SECURE CHANNELS LIST -->
-            <div class="p-3 overflow-y-auto flex-1 space-y-2 terminal-scroll">
-                <div class="text-[9px] text-emerald-600/60 uppercase font-bold tracking-wider px-2 mb-1">ACCESS ROUTINES</div>
-                <div class="p-3 bg-emerald-950/20 border border-emerald-500/40 rounded flex items-center justify-between group cursor-pointer hover:bg-emerald-950/40 transition">
-                    <span class="text-xs font-bold tracking-wide text-emerald-300">[O5 SITE GENERAL COMS]</span>
-                    <span class="text-[9px] bg-emerald-500 text-black px-1.5 py-0.2 rounded font-bold uppercase animate-pulse">SECURE</span>
-                </div>
-            </div>
-            
-            <div class="p-3 bg-black/80 border-t border-emerald-500/10 text-[9px] text-emerald-600/70 tracking-tighter">
-                NOTICE: ALL TRAFFIC MONITORED BY R.A.I.S.A. FOR SECURITY DEVIATIONS.
+            <div class="p-3 bg-black/40 border-t border-white/10 text-[9px] text-center opacity-40 font-mono tracking-tighter">
+                REPLICA ENGINE RECONSTRUCT v4.81 — PERSISTENT SQL ARCHIVE ACTIVE
             </div>
         </div>
-        <!-- MAIN SECURE CONSOLE LOGS -->
-        <div class="flex-1 flex flex-col h-full bg-zinc-950/20 relative">
-            <div class="absolute top-2 right-4 text-[9px] text-emerald-600/30 select-none font-bold">TERMINAL: BACKEND_CONNECTION_CONNECTED</div>
+        <!-- RIGHT PANEL: CHAT TIMELINE STREAM FRAME WORKSPACE -->
+        <div class="flex-1 flex flex-col h-full bg-black/20 relative">
             
-            <!-- MESSAGE RENDER GRID -->
-            <div id="messages-container" class="flex-1 p-6 overflow-y-auto space-y-4 terminal-scroll bg-[radial-gradient(rgba(16,185,129,0.02)_1px,transparent_1px)] bg-[size:16px_16px]"></div>
+            <!-- Real-Time Conversational Feed Track Grid -->
+            <div id="messages-container" class="flex-1 p-5 overflow-y-auto space-y-3.5 terminal-scroll"></div>
 
-            <!-- ANIMATED TEXT AND VOICE ENGINE WRAPPER -->
-            <div class="p-4 border-t border-emerald-500/20 bg-black/70 flex items-center gap-3">
-                <div class="flex-1 relative">
-                    <input type="text" id="message-input" placeholder="Enter encrypted text chunk standard protocol..." class="w-full bg-zinc-950 border border-emerald-500/30 rounded p-3 pl-4 pr-10 text-emerald-400 placeholder-emerald-900/60 font-mono text-xs focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition">
-                    <div class="absolute right-3 top-3.5 w-1.5 h-1.5 bg-emerald-500 rounded-full opacity-30 animate-ping"></div>
-                </div>
+            <!-- Operational Control Box Line Input Row -->
+            <div class="p-4 border-t border-white/10 bg-black/40 flex items-center gap-3">
+                <input type="text" id="message-input" placeholder="Type verified encrypted message packet..." class="flex-1 bg-black/50 border border-white/20 rounded-lg p-3 text-xs focus:outline-none focus:border-white/40 transition font-mono">
                 
-                <!-- STYLIZED VOICE MESSAGE ENGINE TOGGLE BUTTON -->
-                <button id="voice-btn" onclick="toggleVoiceRecord()" title="Record Tactical Audio Transmission" class="bg-zinc-950 border border-emerald-500/30 text-emerald-400 p-3 rounded hover:bg-emerald-500 hover:text-black hover:border-emerald-400 transition duration-200 flex items-center justify-center relative group">
-                    <svg id="mic-icon" class="w-5 h-5 group-hover:scale-105 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                <!-- Native Dynamic Core Voice Node Capture Trigger -->
+                <button id="voice-btn" onclick="toggleVoiceRecord()" class="bg-black/50 border border-white/20 p-3 rounded-lg hover:bg-white hover:text-black transition duration-150 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                 </button>
 
-                <button onclick="sendText()" class="bg-emerald-950 border border-emerald-400/60 text-emerald-400 px-6 py-3 rounded text-xs font-bold uppercase tracking-widest hover:bg-emerald-400 hover:text-black transition duration-200">TRANSMIT</button>
+                <button onclick="sendText()" class="bg-white/10 border border-white/40 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-white hover:text-black transition duration-200">TRANSMIT</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Adjust this configuration URL when deploying your FastAPI main.py to Render production
         const BACKEND_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') 
             ? 'http://127.0.0.1:8000' 
             : window.location.origin;
             
-        let socket, mediaRecorder, audioChunks = [], isRecording = false;
+        let socket, mediaRecorder, audioChunks = [], isRecording = false, currentUser = "", currentTheme = "scp";
 
-        // --- Persistent Boot Initialization Routing ---
+        // Autologin System Pipeline Routine Checks
         window.addEventListener('load', async () => {
             const savedToken = localStorage.getItem('scp_session_token');
             if (savedToken) {
@@ -155,19 +128,18 @@
                     });
                     const data = await response.json();
                     if (data.success) {
+                        currentUser = data.username;
+                        currentTheme = data.theme;
                         launchSecureChat(data.username);
-                    } else {
-                        localStorage.removeItem('scp_session_token');
-                    }
-                } catch (e) { console.error("System Core Offline: Endpoint server cannot be mapped."); }
+                    } else { localStorage.removeItem('scp_session_token'); }
+                } catch (e) { console.error("Database Engine offline or unreachable."); }
             }
         });
 
-        // --- Authentication Flow Engine ---
         async function handleAuth(endpoint) {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            if(!username || !password) return alert("CRITICAL TERMINATION: Cryptographic parameters required.");
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if(!username || !password) return alert("System Parameters error.");
 
             try {
                 const res = await fetch(`${BACKEND_URL}${endpoint}`, {
@@ -176,22 +148,46 @@
                     body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
-                if(!res.ok) return alert(`ACCESS DENIED: ${data.detail || "Verification missing."}`);
+                if(!res.ok) return alert(`ACCESS DENIED: ${data.detail || "Authentication Failed"}`);
 
                 localStorage.setItem('scp_session_token', data.token);
+                currentUser = data.username;
+                currentTheme = data.theme || "scp";
                 launchSecureChat(data.username);
-            } catch(e) { alert("SYSTEM DIAGNOSTIC FAULT: Target backend host not found."); }
+            } catch(e) { alert("Core Database Node handshake failure."); }
         }
 
         function launchSecureChat(username) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('chat-screen').classList.remove('hidden');
             document.getElementById('user-display').innerText = username.toUpperCase();
+            
+            // Render active skin alignment configuration parameters
+            applyThemeClasses(currentTheme);
+            document.getElementById('theme-selector').value = currentTheme;
 
-            // Fire up the WebSocket channel configuration to target FastAPI server
             socket = io(BACKEND_URL, { path: "/socket.io" });
             socket.emit('join', username);
             socket.on('receiveMessage', (msg) => { renderIncomingMessage(msg); });
+        }
+
+        async function swapActiveTheme(newTheme) {
+            currentTheme = newTheme;
+            applyThemeClasses(newTheme);
+            const token = localStorage.getItem('scp_session_token');
+            if(token) {
+                await fetch(`${BACKEND_URL}/api/theme`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ theme: newTheme })
+                });
+            }
+        }
+
+        function applyThemeClasses(theme) {
+            document.body.className = `theme-${theme}`;
+            const leftPanel = document.getElementById('left-panel');
+            leftPanel.className = `w-80 border-r border-white/10 flex flex-col justify-between panel-${theme}`;
         }
 
         function logout() {
@@ -206,7 +202,6 @@
             input.value = '';
         }
 
-        // --- High-Fidelity Tactical Voice Note Capturing ---
         async function toggleVoiceRecord() {
             const btn = document.getElementById('voice-btn');
             if (!isRecording) {
@@ -220,50 +215,48 @@
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                         const reader = new FileReader();
                         reader.readAsDataURL(audioBlob);
-                        reader.onloadend = () => {
-                            socket.emit('sendMessage', { voice: reader.result });
-                        };
+                        reader.onloadend = () => { socket.emit('sendMessage', { voice: reader.result }); };
                     };
 
                     mediaRecorder.start();
                     isRecording = true;
-                    btn.classList.add('voice-pulse', 'border-red-500', 'text-red-500');
-                } catch (err) { alert("Mic hardware verification trace blocked or missing input permissions."); }
+                    btn.classList.add('pulse-mic');
+                } catch (err) { alert("Microphone hardware stream trace blocked."); }
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
-                btn.classList.remove('voice-pulse', 'border-red-500', 'text-red-500');
+                btn.classList.remove('pulse-mic');
             }
         }
 
-        // --- Holographic Message Rendering Engine ---
         function renderIncomingMessage(msg) {
             const container = document.getElementById('messages-container');
-            const wrapper = document.createElement('div');
-            wrapper.className = "flex flex-col bg-black/60 p-3.5 border border-emerald-900/60 rounded max-w-2xl animate__animated animate__fadeInUp relative overflow-hidden";
+            const item = document.createElement('div');
             
-            // Neon accent strip indicator
-            const sideStrip = document.createElement('div');
-            sideStrip.className = "absolute left-0 top-0 h-full w-1 bg-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.6)]";
-            wrapper.appendChild(sideStrip);
+            // Check self vs external packet sender to align bubbles left or right exactly like WhatsApp
+            const isMe = msg.sender.toLowerCase() === currentUser.toLowerCase();
+            item.className = `w-full flex ${isMe ? 'justify-end' : 'justify-start'}`;
 
-            const header = `<div class="flex justify-between items-center text-[10px] mb-2 font-mono tracking-wider pl-1.5">
-                <span class="font-bold text-emerald-400 select-all">${msg.sender.toUpperCase()}</span>
-                <span class="text-emerald-700/80 font-semibold">[TIMESTAMP: ${msg.timestamp}]</span>
-            </div>`;
-
-            let content = '';
+            const bubbleClass = isMe ? `bubble-me-${currentTheme}` : `bubble-them-${currentTheme}`;
+            
+            let messageContent = "";
             if (msg.text) {
-                content = `<p class="text-xs text-emerald-300 font-mono tracking-wide leading-relaxed pl-1.5 whitespace-pre-wrap select-all">${msg.text}</p>`;
+                messageContent = `<p class="text-xs font-mono leading-relaxed select-all">${msg.text}</p>`;
             } else if (msg.voice) {
-                content = `<div class="mt-1 pl-1.5 w-full flex items-center gap-2">
-                    <span class="text-[9px] uppercase tracking-widest text-emerald-500 animate-pulse font-bold">[AUDIO TRANS:]</span>
-                    <audio controls src="${msg.voice}" class="flex-1 accent-emerald-500 rounded h-7 bg-emerald-950/40 border border-emerald-500/20"></audio>
-                </div>`;
+                messageContent = `<audio controls src="${msg.voice}" class="w-56 mt-1 h-7 rounded"></audio>`;
             }
 
-            wrapper.innerHTML += header + content;
-            container.appendChild(wrapper);
+            item.innerHTML = `
+                <div class="${bubbleClass} p-3 max-w-md shadow-md animate__animated animate__fadeInUp relative">
+                    <div class="flex justify-between items-center gap-4 text-[9px] opacity-40 font-bold mb-1">
+                        <span>${msg.sender.toUpperCase()}</span>
+                        <span>${msg.timestamp}</span>
+                    </div>
+                    ${messageContent}
+                </div>
+            `;
+            
+            container.appendChild(item);
             container.scrollTop = container.scrollHeight;
         }
     </script>
